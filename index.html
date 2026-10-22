@@ -1,0 +1,760 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101b16">
+  <title>Simba Chess | Play. Compete. Belong.</title>
+  <style>
+    :root {
+      --bg: #101b16;
+      --panel: #192820;
+      --green: #b5e853;
+      --muted: #aab8ae;
+      --border: #304238;
+      --gold: #f5c65d;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: #f6f8f4;
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+    }
+
+    header {
+      padding: 16px 6%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(16, 27, 22, .96);
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: -.5px;
+    }
+
+    .logo span { color: var(--green); }
+
+    nav {
+      display: flex;
+      gap: 22px;
+      flex-wrap: wrap;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    nav a:hover { color: var(--green); }
+
+    .btn {
+      display: inline-block;
+      padding: 11px 18px;
+      border: 0;
+      border-radius: 9px;
+      font-weight: bold;
+      background: var(--green);
+      color: #142014;
+    }
+
+    .btn.secondary {
+      color: white;
+      background: transparent;
+      border: 1px solid var(--border);
+    }
+
+    .hero {
+      padding: 76px 6% 64px;
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      align-items: center;
+      gap: 48px;
+      background:
+        radial-gradient(ellipse at 80% 20%, #2b482b 0%, transparent 55%);
+    }
+
+    .eyebrow {
+      color: var(--green);
+      font-size: 12px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-size: clamp(40px, 6vw, 70px);
+      line-height: 1.05;
+      letter-spacing: -2px;
+      margin: 18px 0;
+    }
+
+    h1 span { color: var(--green); }
+
+    .hero p {
+      color: var(--muted);
+      max-width: 520px;
+      font-size: 17px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 25px;
+    }
+
+    .board-wrap {
+      max-width: 390px;
+      width: 100%;
+      margin: auto;
+      padding: 12px;
+      background: #25372c;
+      border: 1px solid #405546;
+      border-radius: 14px;
+      box-shadow: 0 20px 65px #0006;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      aspect-ratio: 1;
+      overflow: hidden;
+      border-radius: 5px;
+    }
+
+    .square {
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      border: 0;
+      padding: 0;
+      font-size: clamp(21px, 4vw, 39px);
+      line-height: 1;
+      user-select: none;
+    }
+
+    .light { background: #e6e5ce; }
+    .dark { background: #608268; }
+
+    .white-piece {
+      color: #fff;
+      text-shadow: 0 2px 2px #000, 0 0 2px #000;
+    }
+
+    .black-piece {
+      color: #17221b;
+      text-shadow: 0 1px 1px #fff5;
+    }
+
+    .square.selected {
+      background: #e9d65e;
+    }
+
+    .square.possible {
+      box-shadow: inset 0 0 0 4px #b5e853;
+    }
+
+    .board-status {
+      color: var(--muted);
+      font-size: 13px;
+      padding: 10px 4px 0;
+      text-align: center;
+    }
+
+    section { padding: 62px 6%; }
+
+    .section-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 26px;
+    }
+
+    h2 {
+      font-size: clamp(27px, 4vw, 38px);
+      margin: 5px 0;
+      line-height: 1.2;
+    }
+
+    .muted { color: var(--muted); }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px;
+      min-width: 0;
+    }
+
+    .card h3 { margin: 8px 0; }
+
+    .card p {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .emoji {
+      font-size: 30px;
+      display: block;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 4px 9px;
+      font-size: 11px;
+      color: var(--green);
+      background: #34472b;
+      border-radius: 20px;
+    }
+
+    .rank-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    .rank-table th, .rank-table td {
+      padding: 15px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .rank-table th {
+      color: var(--muted);
+      font-weight: normal;
+    }
+
+    .rank-table td:last-child {
+      color: var(--green);
+      font-weight: bold;
+    }
+
+    .table-wrap { overflow-x: auto; }
+
+    .support {
+      background: linear-gradient(130deg, #213d29, #192820);
+      border: 1px solid #48663d;
+      border-radius: 18px;
+      padding: clamp(24px, 5vw, 45px);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      align-items: center;
+    }
+
+    .mpesa-number {
+      font-size: clamp(25px, 4vw, 37px);
+      font-weight: 900;
+      letter-spacing: 1px;
+      margin: 12px 0;
+      overflow-wrap: anywhere;
+    }
+
+    .copy-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .copy-row input {
+      flex: 1;
+      min-width: 140px;
+      background: #101b16;
+      border: 1px solid var(--border);
+      color: white;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 16px;
+    }
+
+    .notice {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .status-message {
+      min-height: 24px;
+      font-size: 13px;
+      color: var(--green);
+    }
+
+    footer {
+      padding: 28px 6%;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    @media (max-width: 760px) {
+      header { flex-wrap: wrap; }
+      nav { order: 3; width: 100%; gap: 15px; }
+      .hero { grid-template-columns: 1fr; padding-top: 48px; }
+      .board-wrap { max-width: 340px; }
+      .cards { grid-template-columns: 1fr; }
+      .support { grid-template-columns: 1fr; }
+      section { padding-top: 44px; padding-bottom: 44px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="#" class="logo">♟ SIMBA<span> CHESS</span></a>
+
+  <nav>
+    <a href="#clubs">Clubs</a>
+    <a href="#rankings">Rankings</a>
+    <a href="#tournaments">Tournaments</a>
+    <a href="#support">Support</a>
+  </nav>
+
+  <a class="btn" href="#play">Play chess</a>
+</header>
+
+<main>
+  <section class="hero" id="play">
+    <div>
+      <div class="eyebrow">♟ Kenya's chess community</div>
+
+      <h1>Think sharp.<br>Play bold.<br><span>Roar louder.</span></h1>
+
+      <p>
+        Welcome to Simba Chess — a home for Kenyan chess players
+        to compete, represent their clubs, climb the rankings
+        and build a stronger chess community.
+      </p>
+
+      <div class="actions">
+        <a class="btn" href="#clubs">Explore clubs →</a>
+        <a class="btn secondary" href="#rankings">View rankings</a>
+      </div>
+
+      <p class="notice">
+        Built for players, powered by community. Karibu!
+      </p>
+    </div>
+
+    <div class="board-wrap">
+      <div id="chessboard" class="board" aria-label="Interactive chessboard"></div>
+      <div id="board-status" class="board-status" aria-live="polite">
+        White to move · Select a piece, then its destination.
+      </div>
+      <div class="actions" style="justify-content:center;margin-top:12px">
+        <button class="btn secondary" id="reset-board">Reset board</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="clubs">
+    <div class="section-heading">
+      <div>
+        <div class="eyebrow">Find your people</div>
+        <h2>Featured clubs</h2>
+        <p class="muted">Build your legacy, one move at a time.</p>
+      </div>
+    </div>
+
+    <div class="cards">
+      <article class="card">
+        <span class="emoji">🦁</span>
+        <span class="tag">Community</span>
+        <h3>Simba Chess Club</h3>
+        <p>A place for players to learn, practice and compete together.</p>
+        <a class="btn secondary" href="#support">Join the community</a>
+      </article>
+
+      <article class="card">
+        <span class="emoji">♟️</span>
+        <span class="tag">Competition</span>
+        <h3>Rising Knights</h3>
+        <p>A sample club concept for ambitious players looking to improve.</p>
+        <a class="btn secondary" href="#rankings">Explore rankings</a>
+      </article>
+
+      <article class="card">
+        <span class="emoji">🏆</span>
+        <span class="tag">Champions</span>
+        <h3>Elite Board</h3>
+        <p>A home for competitive players aiming for the top.</p>
+        <a class="btn secondary" href="#tournaments">View tournaments</a>
+      </article>
+    </div>
+
+    <p class="notice">
+      These clubs are demonstration content, not verified real clubs.
+      Replace them with actual clubs as your community grows.
+    </p>
+  </section>
+
+  <section id="rankings">
+    <div class="section-heading">
+      <div>
+        <div class="eyebrow">Make every move count</div>
+        <h2>Player rankings</h2>
+        <p class="muted">Sample leaderboard for the frontend preview.</p>
+      </div>
+      <span class="tag">Demo data</span>
+    </div>
+
+    <div class="card table-wrap">
+      <table class="rank-table">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Player</th>
+            <th>Club</th>
+            <th>Rating</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>🥇 1</td>
+            <td>Simba King</td>
+            <td>Simba Chess</td>
+            <td>1850</td>
+          </tr>
+          <tr>
+            <td>🥈 2</td>
+            <td>Queen's Gambit</td>
+            <td>Rising Knights</td>
+            <td>1720</td>
+          </tr>
+          <tr>
+            <td>🥉 3</td>
+            <td>Silent Knight</td>
+            <td>Elite Board</td>
+            <td>1640</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>Young Lion</td>
+            <td>Simba Chess</td>
+            <td>1510</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cards" style="margin-top:18px">
+      <article class="card">
+        <h3>🏘️ Club rankings</h3>
+        <p>Discover the strongest clubs and their champions.</p>
+      </article>
+      <article class="card">
+        <h3>🇰🇪 National rankings</h3>
+        <p>Track players competing across Kenya.</p>
+      </article>
+      <article class="card">
+        <h3>🌍 Global rankings</h3>
+        <p>Build toward international competition.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="tournaments">
+    <div class="section-heading">
+      <div>
+        <div class="eyebrow">Your next challenge</div>
+        <h2>Tournaments</h2>
+        <p class="muted">A starting point for competitive chess events.</p>
+      </div>
+    </div>
+
+    <div class="cards">
+      <article class="card">
+        <span class="emoji">⚡</span>
+        <span class="tag">Blitz</span>
+        <h3>Simba Blitz Arena</h3>
+        <p>Fast games. Sharp tactics. Big energy.</p>
+        <p>Schedule: To be announced</p>
+        <button class="btn secondary" onclick="tournamentMessage()">
+          Tournament details
+        </button>
+      </article>
+
+      <article class="card">
+        <span class="emoji">♟️</span>
+        <span class="tag">Classical</span>
+        <h3>Club Championship</h3>
+        <p>Represent your club and compete for the crown.</p>
+        <p>Schedule: To be announced</p>
+        <button class="btn secondary" onclick="tournamentMessage()">
+          Tournament details
+        </button>
+      </article>
+
+      <article class="card">
+        <span class="emoji">🏆</span>
+        <span class="tag">Open</span>
+        <h3>Simba Open</h3>
+        <p>A community event for players of different skill levels.</p>
+        <p>Schedule: To be announced</p>
+        <button class="btn secondary" onclick="tournamentMessage()">
+          Tournament details
+        </button>
+      </article>
+    </div>
+
+    <p id="tournament-status" class="status-message" aria-live="polite"></p>
+  </section>
+
+  <section id="support">
+    <div class="support">
+      <div>
+        <div class="eyebrow">Help us grow</div>
+        <h2>Support the Creator ❤️</h2>
+        <p class="muted">
+          Help build Simba Chess into a home for players, clubs
+          and chess lovers across Kenya.
+        </p>
+        <p>
+          Your support helps make this community possible.
+          As Simba Chess grows, so can its opportunities for players.
+        </p>
+      </div>
+
+      <div>
+        <div class="eyebrow">M-Pesa support number</div>
+
+        <div class="mpesa-number" id="mpesa-display">0180236707</div>
+
+        <div class="copy-row">
+          <input
+            id="mpesa-number"
+            type="text"
+            value="0180236707"
+            readonly
+            aria-label="M-Pesa support number"
+          >
+          <button class="btn" id="copy-mpesa">Copy number</button>
+        </div>
+
+        <p id="copy-status" class="status-message" aria-live="polite"></p>
+
+        <p class="notice">
+          1. Copy the number above.<br>
+          2. Open M-Pesa on your phone.<br>
+          3. Use the appropriate send-money or payment option
+          for the number provided, after confirming its registered
+          payment type and recipient.
+        </p>
+
+        <p class="notice">
+          Please confirm the number and recipient before sending.
+          This website does not process payments.
+        </p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div>♟ <strong>Simba Chess</strong> · Play. Compete. Belong.</div>
+  <div>Made with passion for the chess community in Kenya.</div>
+  <div>© <span id="year"></span> Simba Chess</div>
+</footer>
+
+<script>
+  // Set up a playable demonstration chessboard.
+  // This is not yet a complete chess game: legal moves,
+  // check, checkmate, castling and promotion are not implemented.
+
+  const files = "abcdefgh";
+  const initialPosition = [
+    ["♜","♞","♝","♛","♚","♝","♞","♜"],
+    ["♟","♟","♟","♟","♟","♟","♟","♟"],
+    ["","","","","","","",""],
+    ["","","","","","","",""],
+    ["","","","","","","",""],
+    ["","","","","","","",""],
+    ["♙","♙","♙","♙","♙","♙","♙","♙"],
+    ["♖","♘","♗","♕","♔","♗","♘","♖"]
+  ];
+
+  const board = document.getElementById("chessboard");
+  const status = document.getElementById("board-status");
+
+  let position;
+  let selected = null;
+  let turn = "white";
+
+  function isWhite(piece) {
+    return "♙♖♘♗♕♔".includes(piece);
+  }
+
+  function pieceColor(piece) {
+    if (!piece) return null;
+    return isWhite(piece) ? "white" : "black";
+  }
+
+  function resetBoard() {
+    position = initialPosition.map(row => [...row]);
+    selected = null;
+    turn = "white";
+    renderBoard();
+    status.textContent =
+      "White to move · Select a piece, then its destination.";
+  }
+
+  function renderBoard() {
+    board.innerHTML = "";
+
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const piece = position[r][c];
+        const square = document.createElement("button");
+
+        square.type = "button";
+        square.className =
+          "square " + ((r + c) % 2 === 0 ? "light" : "dark");
+
+        if (selected && selected.r === r && selected.c === c) {
+          square.classList.add("selected");
+        }
+
+        square.textContent = piece;
+        square.setAttribute(
+          "aria-label",
+          (piece || "Empty") + " square " + files[c] + (8-r)
+        );
+
+        if (piece) {
+          square.classList.add(
+            pieceColor(piece) === "white"
+              ? "white-piece"
+              : "black-piece"
+          );
+        }
+
+        square.addEventListener("click", () => handleSquare(r, c));
+        board.appendChild(square);
+      }
+    }
+  }
+
+  function handleSquare(r, c) {
+    const piece = position[r][c];
+
+    if (!selected) {
+      if (!piece) {
+        status.textContent = "Select a square containing a piece.";
+        return;
+      }
+
+      if (pieceColor(piece) !== turn) {
+        status.textContent = "It's " + turn + "'s turn.";
+        return;
+      }
+
+      selected = {r, c};
+      renderBoard();
+      status.textContent =
+        "Selected " + piece + " at " + files[c] + (8-r) +
+        ". Choose a destination.";
+      return;
+    }
+
+    if (selected.r === r && selected.c === c) {
+      selected = null;
+      renderBoard();
+      status.textContent = turn + " to move.";
+      return;
+    }
+
+    if (piece && pieceColor(piece) === turn) {
+      selected = {r, c};
+      renderBoard();
+      status.textContent = "Piece selected. Choose a destination.";
+      return;
+    }
+
+    const movingPiece = position[selected.r][selected.c];
+
+    position[r][c] = movingPiece;
+    position[selected.r][selected.c] = "";
+
+    selected = null;
+    turn = turn === "white" ? "black" : "white";
+
+    renderBoard();
+
+    status.textContent =
+      "Demo move completed · " +
+      (turn === "white" ? "White" : "Black") +
+      " to move. Legal chess moves are not yet enforced.";
+  }
+
+  document.getElementById("reset-board").addEventListener(
+    "click", resetBoard
+  );
+
+  document.getElementById("copy-mpesa").addEventListener(
+    "click", async () => {
+      const number = "0180236707";
+      const message = document.getElementById("copy-status");
+
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(number);
+        } else {
+          const input = document.getElementById("mpesa-number");
+          input.focus();
+          input.select();
+
+          if (!document.execCommand("copy")) {
+            throw new Error("Copy not supported");
+          }
+        }
+
+        message.textContent = "Number copied: " + number;
+      } catch (error) {
+        message.textContent =
+          "Please select and copy the number manually: " + number;
+      }
+    }
+  );
+
+  function tournamentMessage() {
+    document.getElementById("tournament-status").textContent =
+      "Tournament registration and schedules will be available when events are configured.";
+  }
+
+  document.getElementById("year").textContent =
+    new Date().getFullYear();
+
+  resetBoard();
+</script>
+
+</body>
+</html>
